@@ -15,18 +15,16 @@ This code is in the public domain.
 
 """
 
-
 import optparse
 import os.path
 import re
-import polib    # from http://bitbucket.org/izi/polib
+import polib  # from http://bitbucket.org/izi/polib
 import HTMLParser
 
-VERSION_STR = '1.1.1'
+VERSION_STR = '1.1.2'
 
 
 class HtmlAwareMessageMunger(HTMLParser.HTMLParser):
-
     # Lifted from http://translate.sourceforge.net
     ORIGINAL = u"ABCDEFGHIJKLMNOPQRSTUVWXYZ" + u"abcdefghijklmnopqrstuvwxyz"
     REWRITE_UNICODE_MAP = u"ȦƁƇḒḖƑƓĦĪĴĶĿḾȠǾƤɊŘŞŦŬṼẆẊẎẐ" + u"ȧƀƈḓḗƒɠħīĵķŀḿƞǿƥɋřşŧŭṽẇẋẏẑ"
@@ -116,6 +114,10 @@ def munge_one_file(fname, blank, canon_name=None):
             hamm.feed(entry.msgid)
             entry.msgstr = hamm.result()
 
+            if entry.msgstr_plural:
+                entry.msgstr_plural[0] = hamm.result()
+                entry.msgstr_plural[1] = hamm.result()
+
             if 'fuzzy' in entry.flags:
                 entry.flags.remove('fuzzy')  # clear the fuzzy flag
         count += 1
@@ -158,17 +160,17 @@ if __name__ == "__main__":
         version='%prog ' + VERSION_STR)
 
     p.add_option('--canonical', '-c',
-        help="replace msgids from canonical .po file",
-        dest='canonical_po_file')
+                 help="replace msgids from canonical .po file",
+                 dest='canonical_po_file')
     p.add_option(
         '--diff', '-d',
         action='store_true',
         dest='diff',
         help='create a po file with msgids not translated in canonical po file')
     p.add_option('--blank', '-b',
-        help="mark as untranslated where a msgstr would be munged",
-        action='store_true',
-        dest='blank')
+                 help="mark as untranslated where a msgstr would be munged",
+                 action='store_true',
+                 dest='blank')
 
     options, po_files = p.parse_args()
 
